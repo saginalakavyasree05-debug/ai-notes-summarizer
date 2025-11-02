@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AI Notes — Student Summarizer</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg1:#0f1724; --bg2:#0b1420; --card:#12202a;
+      --accent:#28d2c7; --muted:#b7cbd3; --highlight:#88fff0;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:linear-gradient(180deg,var(--bg1),#071019);color:var(--muted)}
+    .container{max-width:980px;margin:28px auto;padding:28px}
+    header{display:flex;align-items:center;gap:12px}
+    h1{margin:0;color:white;font-size:2rem}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:14px; padding:18px; box-shadow:0 8px 30px rgba(2,6,23,0.6); margin-top:18px}
+    label{display:block;color:var(--muted);margin-bottom:8px}
+    textarea{width:100%;min-height:160px;border-radius:10px;padding:12px;border:none;background:transparent;color:#dbe9ee;outline:1px solid rgba(255,255,255,0.04)}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .btn{background:linear-gradient(90deg,var(--accent),#41c7ff);color:#012; padding:12px 16px;border-radius:12px;border:none;cursor:pointer;font-weight:700;box-shadow:0 6px 18px rgba(11,22,28,0.5)}
+    .muted{color:var(--muted);font-size:0.95rem}
+    .summary-box{margin-top:18px;background:#0b262c;padding:18px;border-radius:12px;color:#e6f6f4}
+    .summary-box h2{margin:0 0 8px 0;color:var(--accent)}
+    .raw-box{margin-top:12px;background:#071e25;padding:14px;border-radius:12px;color:var(--muted);font-size:0.95rem}
+    u{ text-decoration: underline 2px solid var(--highlight); text-decoration-thickness: 2px; text-underline-offset: 4px; color:inherit }
+    .save-btn{background:#dff7ef;color:#004b43;padding:10px 14px;border-radius:10px;border:none;cursor:pointer}
+    .small{font-size:0.86rem;color:var(--muted)}
+    .error{background:#3b1a14;color:#ffd6cf;padding:10px;border-radius:8px;margin-top:10px}
+    .footer{margin-top:14px;color:var(--muted);font-size:0.85rem}
+    .controls{display:flex;gap:12px;align-items:center}
+    input[type="file"]{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>✨ AI Notes Summarizer (Student-first)</h1>
+        <div class="small">Paste notes or upload file (txt, pdf, docx, jpg, png). Summaries are designed to help students study quickly — important terms are <u style="text-decoration-color:var(--highlight)">underlined</u>.</div>
+      </div>
+    </header>
+
+    <form method="POST" enctype="multipart/form-data" class="card">
+      <label for="text"><b>Enter / Paste text</b></label>
+      <textarea name="text" id="text" placeholder="Paste or type your text here...">{{ raw_text or '' }}</textarea>
+
+      <div style="height:10px"></div>
+
+      <div class="row">
+        <div>
+          <label class="small">Upload file (optional)</label>
+          <input type="file" name="file" accept=".txt,.pdf,.docx,.png,.jpg,.jpeg">
+        </div>
+
+        <div style="flex:1"></div>
+
+        <div>
+          <label class="small">Summary style: Student-focused (auto)</label>
+          <div class="muted">We automatically pick the best length and important points for students.</div>
+        </div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="row">
+        <button class="btn" type="submit">✨ Summarize</button>
+        <div class="small">Supported: .txt, .pdf, .docx, images. For images use clear scans (install Tesseract for OCR).</div>
+      </div>
+
+    </form>
+
+    {% if error_message %}
+      <div class="error card">{{ error_message }}</div>
+    {% endif %}
+
+    <div class="card summary-box">
+      <h2>🧠 Key Summary for Students — Subject: {{ subject }}</h2>
+
+      {% if summary_html %}
+        <div style="line-height:1.6" id="summary-content">{{ summary_html|safe }}</div>
+        <div style="margin-top:12px">
+          <button class="save-btn" id="save-summary">💾 Save Summary</button>
+        </div>
+      {% else %}
+        <div class="muted">No summary yet — paste text or upload a file and press Summarize.</div>
+      {% endif %}
+    </div>
+
+    {% if raw_text %}
+      <div class="card raw-box">
+        <h3 class="small">Extracted / Input Text</h3>
+        <div style="white-space:pre-wrap">{{ raw_text }}</div>
+      </div>
+    {% endif %}
+
+    <div class="footer">Tip: For images and scanned PDFs install Tesseract OCR. If summary looks short try a longer input or a clearer file.</div>
+  </div>
+
+  <script>
+    document.getElementById("save-summary")?.addEventListener("click", function(){
+      const content = document.getElementById("summary-content")?.innerText || "";
+      if (!content.trim()) { alert("No summary to save."); return; }
+
+      // create blob and trigger download
+      const blob = new Blob([content], {type: "text/plain;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "summary.txt"; document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1000);
+    });
+  </script>
+</body>
+</html>
