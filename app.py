@@ -218,4 +218,5 @@ def download_summary():
     return send_file(io.BytesIO(data.encode("utf-8")), as_attachment=True, download_name="summary.txt", mimetype="text/plain")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(host='0.0.0.0',port=10000)
