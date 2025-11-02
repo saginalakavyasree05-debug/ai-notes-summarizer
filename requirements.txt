@@ -1,4 +1,9 @@
-flask>=2.0
+flask>=2.0.0
 nltk
 transformers>=4.0.0
+scikit_learn
+pdfplumber
+python-docx
+pytesseract
+opencv-python
 torch
