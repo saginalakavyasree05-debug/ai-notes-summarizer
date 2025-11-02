@@ -2,4 +2,5 @@ flask>=2.0
 nltk
 transformers>=4.0.0
 scikit-learn
+pdfplumber
 
